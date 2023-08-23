@@ -11,7 +11,7 @@ with open(csv_out, mode='w') as csv_out:
 
     # read the data from the file
     data = open(filename).read()
-
+    
     # iterate through the contents
     for cal in vobject.readComponents(data):
         for component in cal.components():
