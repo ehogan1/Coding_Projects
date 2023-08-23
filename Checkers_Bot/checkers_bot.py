@@ -306,12 +306,12 @@ class SmartBot:
                 # colored pieces around it to incentivise pushing your pieces
                 # together
                 if square.get_color() == piece.get_color:
-                    pos_score += 0
+                    pos_score += 400
                 # Adds value to the positional score when the piece can jump an
                 # opposing piece but cannot be jumped themselves
                 if cords in checkers.get_jump_moves(self.color) and not \
                         checkers.has_jump_move(opp_color):
-                    pos_score += 0
+                    pos_score += 750
         return pos_score
 
     def evaluate_move(self, move) -> int:
