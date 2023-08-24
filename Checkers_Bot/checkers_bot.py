@@ -99,12 +99,36 @@ class SmartBot:
         final_move = None
         for start_coord, destinations in moves.items():
             for destination in destinations:
-                score = self.evaluate_move((start_coord, destination))
+                score = self.two_level_evaluate_move((start_coord, destination))
                 if score > max_score:
                     max_score = score
                     final_move = (start_coord, destination)
         return final_move
+
+    def highest_five(self, board, moves, square_values):
+        """
+        Takes in a list of moves and returns the move with the highest
+        calculated score.
+
+        Parameters:
+            moves: dict{tuple(int, int): list[tuple(int, int)]}: a dictionary
+                with keys that are the starting coordinates of a possible move
+                and values that are a list of possible ending coordinates for a
+                move with said starting coordinate
         
+        Returns: 
+            final_move: tuple(tuple(int, int), tuple(int, int)): a start
+                and end destination correlating to the piece move
+        """
+        max_score = [-1000] * 5
+        for start_coord, destinations in moves.items():
+            for destination in destinations:
+                score = self.evaluate_move(board, (start_coord, destination))
+                if score > max_score[0]:
+                    max_score.append(score)
+                    max_score.pop()
+        return max_score
+
     def check_for_jump_blocks(self, moves, jumps):
         """
         Takes in a list of possible moves and a list of jumps that are being
@@ -228,10 +252,10 @@ class SmartBot:
                 cur_row = cord[0]
             # Incentivise taking control of the center of the board
             if cord[1] <= (columns / 2):
-                square_value += 2
+                square_value += 1
                 black_square_values[cord] = square_value
             if cord[1] > (columns / 2):
-                square_value -= 2
+                square_value -= 1
                 black_square_values[cord] = square_value
         return black_square_values
 
@@ -314,7 +338,34 @@ class SmartBot:
                     pos_score += 10
         return pos_score
 
-    def evaluate_move(self, move) -> int:
+    def evaluate_move(self, board, move) -> int:
+        """
+        Takes a potential move and outputs an int which is a score for how good
+        the move is to make.
+        
+        Parameters:
+            board: Checkers: the board that the move is being evaluated on
+            move: tuple(tuple(int, int), tuple(int, int)): the potential move
+                that is being evaluated
+        
+        Returns:
+            score: int: the score that is associated with that potential move
+        """
+        (start, destination) = move
+        if self.color == "RED":
+            square_values = self.find_red_square_values()
+        else:
+            square_values = self.find_black_square_values()
+        cur_score = self.piece_positional_score(board,\
+                        board._board._get_square(start), square_values)
+        temp_checkers = copy.deepcopy(board)
+        temp_checkers.move_piece(start, destination)
+        new_score = self.piece_positional_score(temp_checkers,\
+                        temp_checkers._board._get_square(destination),\
+                        square_values)
+        return new_score
+
+    def two_level_evaluate_move(self, move) -> int:
         """
         Takes a potential move and outputs an int which is a score for how good
         the move is to make.
@@ -327,10 +378,15 @@ class SmartBot:
             score: int: the score that is associated with that potential move
         """
         (start, destination) = move
+        total = 0
         if self.color == "RED":
             square_values = self.find_red_square_values()
+            opp = SmartBot(temp_checkers, "BLACK")
+            col = "RED"
         else:
             square_values = self.find_black_square_values()
+            opp = SmartBot(temp_checkers, "RED")
+            col = "BLACK"
         cur_score = self.piece_positional_score(self.checkers,\
                         self.checkers._board._get_square(start), square_values)
         temp_checkers = copy.deepcopy(self.checkers)
@@ -338,7 +394,11 @@ class SmartBot:
         new_score = self.piece_positional_score(temp_checkers,\
                         temp_checkers._board._get_square(destination),\
                         square_values)
-        return new_score - cur_score
+        opp_start, opp_destination = opp.find_move()
+        temp_checkers.move_piece(opp_start, opp_destination)
+        second_move_score = self.highest_five(temp_checkers, temp_checkers.get_all_valid_player_moves(col), square_values)
+        total = (.5(new_score)) + (.5(((sum(second_move_score))/5) + new_score))
+        return total
 
 class BotTest:
     """
