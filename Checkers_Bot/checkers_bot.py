@@ -228,10 +228,10 @@ class SmartBot:
                 cur_row = cord[0]
             # Incentivise taking control of the center of the board
             if cord[1] <= (columns / 2):
-                square_value += 1
+                square_value += 2
                 black_square_values[cord] = square_value
             if cord[1] > (columns / 2):
-                square_value -= 1
+                square_value -= 2
                 black_square_values[cord] = square_value
         return black_square_values
 
