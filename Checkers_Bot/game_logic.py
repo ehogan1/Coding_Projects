@@ -391,7 +391,7 @@ class Checkers:
         jump_moves = {}
         for piece, moves in player_moves.items():
             for move in moves:
-                if abs(move[0] - piece[0]) == 2:
+                if abs(move[0] - piece[0]) != 1:
                     jump_moves[piece] = jump_moves.get(piece, []) + [move]
         return jump_moves
 
@@ -461,8 +461,8 @@ class Checkers:
         if piece is None:
             raise Exception("There is no piece at the given coordinates.")
         if piece.get_color() == "RED":
-            if self._whose_turn != "RED":
-                raise Exception("It is not red's turn.")
+            # if self._whose_turn != "RED":
+            #     raise Exception("It is not red's turn.")
             if destination_coordinates not in self.get_valid_piece_moves(
                 piece_coordinates
             ):
@@ -504,8 +504,8 @@ class Checkers:
             if not self.has_jump_move("RED") or kinging_move:
                 self._whose_turn = "BLACK"
         else:
-            if self._whose_turn != "BLACK":
-                raise Exception("It is not black's turn.")
+            # if self._whose_turn != "BLACK":
+            #     raise Exception("It is not black's turn.")
             if destination_coordinates not in self.get_valid_piece_moves(
                 piece_coordinates
             ):

@@ -52,19 +52,23 @@ class SmartBot:
         self.checkers = checkers
         self.color = color
 
-    def find_move(self):
+    def find_move(self, board, color):
         """
         This will have the bot return a move that it belives is the best move.
+
+        Parameters:
+            board: Checkers: 
+            color: Enum: the color of the pieces that they would like to move
 
         Returns:
             move: tuple(tuple(int, int), tuple(int, int)): a
                 start and end destination correlating to the piece move
         """
-        possible_moves = self.checkers.get_valid_player_moves(self.color)
-        if self.color == "RED":
-            jumps = self.checkers.get_jump_moves("BLACK")
+        possible_moves = board.get_valid_player_moves(color)
+        if color == "RED":
+            jumps = board.get_jump_moves("BLACK")
         else:
-            jumps = self.checkers.get_jump_moves("RED")
+            jumps = board.get_jump_moves("RED")
         blocks = self.check_for_jump_blocks(possible_moves, jumps)
         # If you are about to get jumped and can prevent it, you should do so.
         # If you can prevent multiples jumps, or one jump in multipple ways,
@@ -79,6 +83,32 @@ class SmartBot:
         # If you are not about to get jumped and you cannot make a king
         # then find the move with the highest score
         return self.highest_score_move(possible_moves)
+
+    def find_opp_move(self, board, color):
+        """
+        This will have the bot return a move that it belives is the best move.
+
+        Parameters:
+            board: Checkers: 
+            color: Enum: the color of the pieces that they would like to move
+
+        Returns:
+            move: tuple(tuple(int, int), tuple(int, int)): a
+                start and end destination correlating to the piece move
+        """
+
+        possible_moves = board.get_valid_player_moves(color)
+        if color == "RED":
+            jumps = board.get_jump_moves("BLACK")
+        else:
+            jumps = board.get_jump_moves("RED")
+        blocks = self.check_for_jump_blocks(possible_moves, jumps)
+        if len(blocks) != 0:
+            return self.highest_opp_score_move(blocks, board)
+        king_moves = self.will_make_king(possible_moves)
+        if len(king_moves) != 0:
+            return self.highest_opp_score_move(king_moves, board)
+        return self.highest_opp_score_move(possible_moves, board)
 
     def highest_score_move(self, moves):
         """
@@ -99,7 +129,34 @@ class SmartBot:
         final_move = None
         for start_coord, destinations in moves.items():
             for destination in destinations:
-                score = self.two_level_evaluate_move((start_coord, destination))
+                score = self.evaluate_move(self.checkers, (start_coord, destination))
+                if score > max_score:
+                    max_score = score
+                    final_move = (start_coord, destination)
+        return final_move
+        
+    def highest_opp_score_move(self, moves, board):
+        """
+        Takes in a list of moves and returns the move with the highest
+        calculated score.
+
+        Parameters:
+            moves: dict{tuple(int, int): list[tuple(int, int)]}: a dictionary
+                with keys that are the starting coordinates of a possible move
+                and values that are a list of possible ending coordinates for a
+                move with said starting coordinate
+            board: Checkers: 
+        
+        Returns: 
+            final_move: tuple(tuple(int, int), tuple(int, int)): a start
+                and end destination correlating to the piece move
+        """
+        max_score = -1000000
+        final_move = None
+        # print(moves)
+        for start_coord, destinations in moves.items():
+            for destination in destinations:
+                score = self.evaluate_move(board, (start_coord, destination))
                 if score > max_score:
                     max_score = score
                     final_move = (start_coord, destination)
@@ -107,8 +164,8 @@ class SmartBot:
 
     def highest_five(self, board, moves, square_values):
         """
-        Takes in a list of moves and returns the move with the highest
-        calculated score.
+        Takes in a list of moves and returns the list of moves with the five highest
+        calculated scores.
 
         Parameters:
             moves: dict{tuple(int, int): list[tuple(int, int)]}: a dictionary
@@ -120,14 +177,16 @@ class SmartBot:
             final_move: tuple(tuple(int, int), tuple(int, int)): a start
                 and end destination correlating to the piece move
         """
-        max_score = [-1000] * 5
+        max_scores = [(-1000, None)] * 5
         for start_coord, destinations in moves.items():
             for destination in destinations:
                 score = self.evaluate_move(board, (start_coord, destination))
-                if score > max_score[0]:
-                    max_score.append(score)
-                    max_score.pop()
-        return max_score
+                if score > max_scores[0][0]:
+                    max_scores.append((score, (start_coord, destination)))
+                    max_scores.sort(reverse=True)
+                    max_scores.pop()
+        final_moves = [score for score, _ in max_scores]
+        return final_moves
 
     def check_for_jump_blocks(self, moves, jumps):
         """
@@ -159,7 +218,7 @@ class SmartBot:
                         return {}
                     (move_start, move_land) = \
                         self.check_for_move_land_blocks(jump_land, moves)
-                    blocks[move_start] = move_land
+                    blocks[move_start] = [move_land]
         return blocks
     
     def check_for_move_land_blocks(self, jump_land, moves):
@@ -330,12 +389,12 @@ class SmartBot:
                 # colored pieces around it to incentivise pushing your pieces
                 # together
                 if square.get_color() == piece.get_color:
-                    pos_score += 30
+                    pos_score += 75
                 # Adds value to the positional score when the piece can jump an
                 # opposing piece but cannot be jumped themselves
                 if cords in checkers.get_jump_moves(self.color) and not \
                         checkers.has_jump_move(opp_color):
-                    pos_score += 10
+                    pos_score += 75
         return pos_score
 
     def evaluate_move(self, board, move) -> int:
@@ -359,7 +418,12 @@ class SmartBot:
         cur_score = self.piece_positional_score(board,\
                         board._board._get_square(start), square_values)
         temp_checkers = copy.deepcopy(board)
-        temp_checkers.move_piece(start, destination)
+        try:
+            temp_checkers.move_piece(start, destination)
+        except Exception:
+            # print(temp_checkers)
+            # print((start, destination))
+            raise Exception()
         new_score = self.piece_positional_score(temp_checkers,\
                         temp_checkers._board._get_square(destination),\
                         square_values)
@@ -381,24 +445,35 @@ class SmartBot:
         total = 0
         if self.color == "RED":
             square_values = self.find_red_square_values()
-            opp = SmartBot(temp_checkers, "BLACK")
-            col = "RED"
+            opp_col = "BLACK"
         else:
             square_values = self.find_black_square_values()
-            opp = SmartBot(temp_checkers, "RED")
-            col = "BLACK"
+            opp_col = "RED"
         cur_score = self.piece_positional_score(self.checkers,\
                         self.checkers._board._get_square(start), square_values)
         temp_checkers = copy.deepcopy(self.checkers)
         temp_checkers.move_piece(start, destination)
+        if temp_checkers.is_game_over:
+            return 100000000
+        # print("\nPOSSIBLE OPP MOVE\n")
+        # print(temp_checkers)
         new_score = self.piece_positional_score(temp_checkers,\
                         temp_checkers._board._get_square(destination),\
                         square_values)
-        opp_start, opp_destination = opp.find_move()
+        # if opp_col == "BLACK":
+        #     self.checkers._whose_turn = "BLACK"
+        # else:
+        #     self.checkers._whose_turn = "RED"
+        opp_start, opp_destination = self.find_opp_move(temp_checkers, opp_col)
         temp_checkers.move_piece(opp_start, opp_destination)
-        second_move_score = self.highest_five(temp_checkers, temp_checkers.get_all_valid_player_moves(col), square_values)
-        total = (.5(new_score)) + (.5(((sum(second_move_score))/5) + new_score))
-        return total
+        # print("\nLIST OF SECOND MOVES\n")
+        # print(temp_checkers.get_valid_player_moves(self.color))
+        second_move_score = self.highest_five(temp_checkers, temp_checkers.get_valid_player_moves(self.color), square_values)
+        total = (.5 * (new_score)) + (.5 * (((sum(second_move_score))/5) + new_score))
+        # print("\nIt's Second Move Score was: ")
+        # print(total)
+        # print("\n")
+        return total - cur_score
 
 class BotTest:
     """
@@ -430,12 +505,13 @@ class BotTest:
             else:
                 rand = RandomBot(checkers, "RED")
             while not checkers.is_game_over():
+                # print(checkers)
+                # print("\n")
                 if checkers.get_whose_turn() == smart.color and not\
                         checkers.is_game_over():
-                    try:
-                        start, destination = smart.find_move()
-                    except Exception:
-                        break
+                    # print("\nBOT'S TURN\n")
+                    start, destination = smart.find_move(smart.checkers, smart.color)
+                    # print("\nBOT FINAL MOVE\n")
                     checkers.move_piece(start, destination)
                 if checkers.get_whose_turn() == rand.color and not\
                         checkers.is_game_over():
@@ -452,6 +528,7 @@ class BotTest:
             rand_win_percent = float((rand_bot_wins / \
                                 (smart_bot_wins + rand_bot_wins + draws))) * 100
             draw_percent = float((draws / trials)) * 100
-        print(f"The SmartBot won {smart_win_percent}% of the games.\n" +\
-              f"The RandBot won {rand_win_percent}% of the games.\n" +\
-              f"There were {draw_percent}% draws.")
+        # print(f"The SmartBot won {smart_win_percent}% of the games.\n" +\
+        #       f"The RandBot won {rand_win_percent}% of the games.\n" +\
+        #       f"There were {draw_percent}% draws.")
+        return smart_win_percent, rand_win_percent

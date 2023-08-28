@@ -3,11 +3,11 @@ import csv
 import sys
 
 # def isc_to_csv(csv_out, filename):
-csv_out = str(sys.argv[1])
-filename = str(sys.argv[2])
+filename = str(sys.argv[1])
+csv_out = str(sys.argv[2])
 with open(csv_out, mode='w') as csv_out:
     csv_writer = csv.writer(csv_out, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    csv_writer.writerow(['WHAT', 'WHO', 'FROM', 'TO', 'DESCRIPTION'])
+    csv_writer.writerow(['WHAT', 'FROM', 'TO'])
 
     # read the data from the file
     data = open(filename).read()
@@ -18,7 +18,5 @@ with open(csv_out, mode='w') as csv_out:
             if component.name == "VEVENT":
                 # write to csv
                 csv_writer.writerow([component.summary.valueRepr(), \
-                                    component.attendee.valueRepr(), \
                                     component.dtstart.valueRepr(), \
-                                    component.dtend.valueRepr(), \
-                                    component.description.valueRepr()])
+                                    component.dtend.valueRepr()])
