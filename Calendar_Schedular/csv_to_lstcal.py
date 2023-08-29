@@ -18,8 +18,10 @@ def add_to_day(day, start_time, end_time):
     """
     """
     started, ended = False, False
-    start_time = int(start_time[:2]) + (int(start_time[3:]) / 60) # Making the time a decimal
-    end_time = int(end_time[:2]) + (int(end_time[3:]) / 60)
+    if isinstance(start_time, str):
+        start_time = int(start_time[:2]) + (int(start_time[3:]) / 60) # Making the time a decimal
+    if isinstance(end_time, str):
+        end_time = int(end_time[:2]) + (int(end_time[3:]) / 60)
     for index, time in enumerate(day): # Creating the Time Pairs
         if start_time < time and not started:
             if (index)%2:
@@ -40,17 +42,17 @@ def add_to_day(day, start_time, end_time):
     return day
 
 
-def csv_to_lstcal(csv_in, planned_time):
+def csv_to_lstcal(csv_in, planned_time, flex):
     """
     """
-    lstcal = [[START, END] for _ in range(61)] # Option to schedule within a 30 day max range of one date
+    lstcal = [[START, END] for _ in range(((flex * 2) + 1))] # Option to schedule within a 30 day max range of one date
     with open(csv_in, 'r') as csv_in:
         csv_reader = csv.reader(csv_in)
 
         # Finding the Date Range
         date = datetime.strptime(planned_time, '%Y-%m-%d %H:%M:%S%z')
-        cal_start = date - timedelta(days=30)
-        cal_end = date + timedelta(days=30)
+        cal_start = date - timedelta(days=flex)
+        cal_end = date + timedelta(days=flex)
 
         # Iterating Through each Event in the Calendar
         day_count = 0

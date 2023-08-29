@@ -27,7 +27,22 @@ from datetime import datetime, timedelta
 # print(day)
 
 
-start_time = datetime(2023, 1, 31, 3, 0, 0)
-end_time = datetime(2023, 2, 5, 21, 30, 0)
-time_difference = end_time - start_time
-print(start_time, end_time, time_difference.days)
+# start_time = datetime(2023, 1, 31, 3, 0, 0)
+# end_time = datetime(2023, 2, 5, 21, 30, 0)
+# time_difference = end_time - start_time
+# print(start_time, end_time, time_difference.days)
+
+# def check(x):
+#     if isinstance(x, str):
+#         print("x is string")
+#     if isinstance(x, int):
+#         print("x is int")
+#     return
+# x = 12
+# check(x)
+
+test = [[], [], [], [], [], []]
+x = 0
+for lis in test:
+    lis = [x]
+print(test)
