@@ -84,7 +84,6 @@ free_times = busy_to_free(busy_times)
 time = datetime.strptime(planned_time, '%Y-%m-%d %H:%M:%S%z')
 days_until_saturday = (5 - time.weekday()) % 7
 days_until_sunday = (6 - time.weekday()) % 7
-print("\n\n", flex, days_until_saturday, "\n\n")
 weekend = (flex + days_until_saturday)%7
 # For times when a Sunday is the first day
 if (flex + days_until_sunday) == 7:
