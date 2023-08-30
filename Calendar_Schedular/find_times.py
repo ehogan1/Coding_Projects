@@ -1,18 +1,23 @@
 # import email_to_ics
+import sys
 import ics_to_csv
 import csv_to_lstcal
+from datetime import datetime, timedelta
 
-def convert(emails, planned_time, flex):
+def convert(emails, icss, planned_time, flex):
     """
     """
-    ics = []
-    csv = []
+    csvs = []
     lstcals = []
-    for email in emails:
-        ics.append(email_to_ics.email_to_ics(email))
-    for ics_file in ics:
-        csv.append(ics_to_csv.isc_to_csv(ics_file))
-    for csv_file in csv:
+    count = 0
+    # for email in emails:
+    #     icss.append(email_to_ics.email_to_ics(email))
+    for ics_file in icss:
+        ics_to_csv.isc_to_csv(ics_file, f"csv{count}")
+        csvs.append(f"csv{count}")
+        count += 1
+    print(csvs)
+    for csv_file in csvs:
         lstcals.append(csv_to_lstcal.csv_to_lstcal(csv_file, planned_time, flex))
     return lstcals
 
@@ -67,12 +72,12 @@ def busy_to_free(busy_times):
             free_times.append(free_day[:-2])
     return free_times
 
-def find_times(emails, planned_time, flex, availibility = "9-5", weekends = False):
+def find_times(emails, icss, planned_time, flex, availibility = "09:00-17:00", weekends = False):
     """
     """
 
     # Converting the emails provided into workable List Calendars
-    lstcals = convert(emails, planned_time, flex)
+    lstcals = convert(emails, icss, planned_time, flex)
 
     # Combine all of the List Calendars to compile a singular list of all busy times
     busy_times = [[] for _ in range(((flex * 2) + 1))]
@@ -95,12 +100,21 @@ def find_times(emails, planned_time, flex, availibility = "9-5", weekends = Fals
     # Find and trim the weekends if needed
     time = datetime.strptime(planned_time, '%Y-%m-%d %H:%M:%S%z')
     days_until_saturday = (5 - time.weekday()) % 7
+    days_until_sunday = (6 - time.weekday()) % 7
     weekend = (flex + days_until_saturday)%7
+    # For times when a Sunday is the first day
+    if (flex + days_until_sunday) == 7:
+        free_times[0] = []
     if weekend >= ((flex * 2) + 1):
         weekend = None
-    if not weekends and weekend:
-        for index, day in free_times:
+    if not weekends and (weekend or weekend == 0):
+        for index, day in enumerate(free_times):
             if (index % 7) == weekend or (index % 7) == (weekend + 1):
                 free_times[index] = []
 
     return free_times
+
+x = sys.argv[1]
+planned_time = "2023-08-31 12:00:00+00:00"
+flex = 2
+print(find_times(None, [x], planned_time, flex))

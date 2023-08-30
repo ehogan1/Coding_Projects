@@ -28,17 +28,16 @@ def add_to_day(day, start_time, end_time):
             if (index)%2 and start_time != day[index - 1]:
                 day.insert(index, start_time)
             started = index
-            continue
-        if end_time < time and started:
-            if index == (started + 1) and (started)%2:
-                day.insert(index, end_time)
+        if end_time <= time and started:
+            if index == (started) and (started)%2:
+                day.insert((index + 1), end_time)
                 break
             if (index)%2:
                 day.insert(index, end_time)
             if (started)%2:
                 day = day[:(started + 1)] + day[(index + 1):]
             else:
-                day = day[:(started)] + day[(index):]
+                day = day[:(started)] + day[(index):] # dont use this since whenever its not index%2 or started%2 you never instert and times???
             break
     element_counts = Counter(day)
     day = [element for element, count in element_counts.items() if count == 1]
