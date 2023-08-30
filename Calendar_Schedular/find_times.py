@@ -1,4 +1,4 @@
-import email_to_ics
+# import email_to_ics
 import ics_to_csv
 import csv_to_lstcal
 
@@ -19,11 +19,17 @@ def convert(emails, planned_time, flex):
 def combine_days(day1, day2):
     """
     """
+    print("Combining:\n")
+    print(day1, day2)
+    print("\n")
     length = len(day2)
     while length > 2:
-        day1 = csv_to_lstcal.add_to_day(day1, day2[1:3])
+        day1 = csv_to_lstcal.add_to_day(day1, day2[1], day2[2])
         day2 = [day2[0]] + day2[3:]
         length -= 2
+    print("Result:\n")
+    print(day1)
+    print("\n")
     return day1
 
 def free_to_busy(avail):
@@ -58,11 +64,10 @@ def busy_to_free(busy_times):
         if free_day == [24, 25]:
             free_times.append([])
         else:
-            free_day[-1] = 24
-            free_times.append(free_day)   
+            free_times.append(free_day[:-2])
     return free_times
 
-def find_times(availibility = "9-5", weekends = False, emails, planned_time, flex):
+def find_times(emails, planned_time, flex, availibility = "9-5", weekends = False):
     """
     """
 
@@ -80,21 +85,22 @@ def find_times(availibility = "9-5", weekends = False, emails, planned_time, fle
     # Add in Unavailible times as busy
     avail = availibility.split(',')
     unavail = free_to_busy(avail)
-    for day in busy_times:
+    for index, day in enumerate(busy_times):
         day = combine_days(day, unavail)
+        busy_times[index] = day
 
     # Invert the busy_times calendar to find the free times
-    busy_to_free(busy_times)
+    free_times = busy_to_free(busy_times)
 
     # Find and trim the weekends if needed
     time = datetime.strptime(planned_time, '%Y-%m-%d %H:%M:%S%z')
     days_until_saturday = (5 - time.weekday()) % 7
     weekend = (flex + days_until_saturday)%7
-    if weekend >= len(busy_times):
+    if weekend >= ((flex * 2) + 1):
         weekend = None
     if not weekends and weekend:
         for index, day in free_times:
             if (index % 7) == weekend or (index % 7) == (weekend + 1):
                 free_times[index] = []
 
-    return []
+    return free_times

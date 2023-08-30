@@ -1,5 +1,6 @@
 import csv
 import sys
+from collections import Counter
 from datetime import datetime, timedelta
 
 
@@ -17,14 +18,14 @@ def same_day(date1, date2):
 def add_to_day(day, start_time, end_time):
     """
     """
-    started, ended = False, False
+    started, ended, placed = False, False, False
     if isinstance(start_time, str):
         start_time = int(start_time[:2]) + (int(start_time[3:]) / 60) # Making the time a decimal
     if isinstance(end_time, str):
         end_time = int(end_time[:2]) + (int(end_time[3:]) / 60)
     for index, time in enumerate(day): # Creating the Time Pairs
-        if start_time < time and not started:
-            if (index)%2:
+        if start_time <= time and not started:
+            if (index)%2 and start_time != day[index - 1]:
                 day.insert(index, start_time)
             started = index
             continue
@@ -39,6 +40,8 @@ def add_to_day(day, start_time, end_time):
             else:
                 day = day[:(started)] + day[(index):]
             break
+    element_counts = Counter(day)
+    day = [element for element, count in element_counts.items() if count == 1]
     return day
 
 
@@ -75,11 +78,11 @@ def csv_to_lstcal(csv_in, planned_time, flex):
     return lstcal
 
 
-csv_in = str(sys.argv[1])
-planned_time = str(sys.argv[2]) # Keep in mind that whatever passes here is getting turned to a string
-test = csv_to_lstcal(csv_in, planned_time)
-for day in test:
-    if day == [-1, 25]:
-        print("NO EVENT\n")
-    else:
-        print(day)
+# csv_in = str(sys.argv[1])
+# planned_time = str(sys.argv[2]) # Keep in mind that whatever passes here is getting turned to a string
+# test = csv_to_lstcal(csv_in, planned_time)
+# for day in test:
+#     if day == [-1, 25]:
+#         print("NO EVENT\n")
+#     else:
+#         print(day)

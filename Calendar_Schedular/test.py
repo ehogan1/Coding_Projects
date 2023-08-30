@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-import email_to_ics
+# import email_to_ics
 import ics_to_csv
 import csv_to_lstcal
 from find_times import combine_days, busy_to_free, free_to_busy
@@ -51,42 +51,61 @@ from find_times import combine_days, busy_to_free, free_to_busy
 #     lis = [x]
 # print(test)
 
-availibility = "9-5"
-weekends = True
-planned_time = "2023-08-31 12:00:00+00:00"
-flex = 2
+        # availibility = "09:00-17:00"
+        # weekends = True
+        # planned_time = "2023-08-31 12:00:00+00:00"
+        # flex = 2
 
-lstcals = [[[-1, 7, 9, 14, 20, 25], [-1, 8, 13, 25], [-1, 5, 9, 10, 23, 25], [-1, 10, 14, 25], [-1, 3, 6, 18, 22, 25]],
-           [[-1, 9, 12, 14, 16, 25], [-1, 5, 10, 12, 16, 25], [-1, 10, 15, 25], [-1, 9, 12, 15, 19, 25], [-1, 5, 10, 25]],
-           [[-1, 15, 21, 25], [-1, 5, 15, 25], [-1, 12, 15, 17, 24, 25], [-1, 7, 16, 25], [-1, 3, 6, 12, 17, 25]]]
 
-# Combine all of the List Calendars to compile a singular list of all busy times
-busy_times = [[] for _ in range(((flex * 2) + 1))]
-for index, day in enumerate(busy_times):
-    day = lstcals[0][index]
-    for person in lstcals[1:]:
-        day = combine_days(day, person[index])
-    busy_times[index] = day
+        # # Missing when there is more than one event in the day
+        # lstcals = [[[-1, 7, 9, 14, 20, 25], [-1, 8, 13, 25], [-1, 5, 9, 10, 23, 25], [-1, 10, 14, 25], [-1, 3, 6, 18, 22, 25]],
+        #             [[-1, 9, 12, 14, 16, 25], [-1, 5, 10, 12, 16, 25], [-1, 10, 15, 25], [-1, 9, 12, 15, 19, 25], [-1, 5, 10, 25]],
+        #             [[-1, 15, 21, 25], [-1, 5, 14, 25], [-1, 12, 15, 17, 24, 25], [-1, 7, 16, 25], [-1, 3, 6, 12, 17, 25]]]
 
-# Add in Unavailible times as busy
-avail = availibility.split(',')
-unavail = free_to_busy(avail)
-for index, day in enumerate(busy_times):
-    day = combine_days(day, unavail)
-    busy_times[index] = day
+        # # Combine all of the List Calendars to compile a singular list of all busy times
+        # busy_times = [[] for _ in range(((flex * 2) + 1))]
+        # for index, day in enumerate(busy_times):
+        #     day = lstcals[0][index]
+        #     for person in lstcals[1:]:
+        #         day = combine_days(day, person[index])
+        #     busy_times[index] = day
 
-# Invert the busy_times calendar to find the free times
-busy_to_free(busy_times)
+        # # Add in Unavailible times as busy
+        # avail = availibility.split(',')
+        # unavail = free_to_busy(avail)
+        # for index, day in enumerate(busy_times):
+        #     day = combine_days(day, unavail)
+        #     busy_times[index] = day
 
-# Find and trim the weekends if needed
-time = datetime.strptime(planned_time, '%Y-%m-%d %H:%M:%S%z')
-days_until_saturday = (5 - time.weekday()) % 7
-weekend = (flex + days_until_saturday)%7
-if weekend >= len(busy_times):
-    weekend = None
-if not weekends and weekend:
-    for index, day in free_times:
-        if (index % 7) == weekend or (index % 7) == (weekend + 1):
-            free_times[index] = []
+        # # Invert the busy_times calendar to find the free times
+        # free_times = busy_to_free(busy_times)
 
-return free_times
+        # # Find and trim the weekends if needed
+        # time = datetime.strptime(planned_time, '%Y-%m-%d %H:%M:%S%z')
+        # days_until_saturday = (5 - time.weekday()) % 7
+        # weekend = (flex + days_until_saturday)%7
+        # if weekend >= ((flex * 2) + 1):
+        #     weekend = None
+        # if not weekends and weekend:
+        #     for index, day in free_times:
+        #         if (index % 7) == weekend or (index % 7) == (weekend + 1):
+        #             free_times[index] = []
+
+        # print(free_times)
+
+
+day1 = [-1, 5, 9, 10, 23, 25]
+day2 = [-1, 12, 15, 17, 24, 25]
+
+def combine_days(day1, day2):
+    """
+    """
+    length = len(day2)
+    while length > 2:
+        print(day1, day2[1], day2[2])
+        day1 = csv_to_lstcal.add_to_day(day1, day2[1], day2[2])
+        day2 = [day2[0]] + day2[3:]
+        length -= 2
+    return day1
+
+print(combine_days(day1, day2))

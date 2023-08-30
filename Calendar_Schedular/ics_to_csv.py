@@ -14,6 +14,6 @@ def isc_to_csv(filename, csv_out):
                                         component.dtstart.valueRepr(), \
                                         component.dtend.valueRepr()])
 
-filename = str(sys.argv[1])
-csv_out = str(sys.argv[2])                    
-isc_to_csv(filename, csv_out)
+# filename = str(sys.argv[1])
+# csv_out = str(sys.argv[2])                    
+# isc_to_csv(filename, csv_out)
