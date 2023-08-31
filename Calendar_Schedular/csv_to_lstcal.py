@@ -1,7 +1,6 @@
 from calendar import day_abbr
 import csv
 from math import e
-import sys
 from collections import Counter
 from datetime import datetime, timedelta
 from time import time_ns
@@ -87,7 +86,7 @@ def csv_to_lstcal(csv_in, planned_time, flex):
                 day_count = ((datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S%z')).date() - cal_start.date()).days
                 lstcal[day_count] = add_to_day(lstcal[day_count], row[1][11:16], row[2][11:16])
                 current_day = datetime.strptime(row[1], '%Y-%m-%d %H:%M:%S%z')
-    return lstcal
+    return lstcal, cal_start
 
 
 # csv_in = str(sys.argv[1])

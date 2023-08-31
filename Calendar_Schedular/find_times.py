@@ -1,24 +1,6 @@
 # import email_to_ics
-import sys
-import ics_to_csv
 import csv_to_lstcal
 from datetime import datetime, timedelta
-
-def convert(emails, icss, planned_time, flex):
-    """
-    """
-    csvs = []
-    lstcals = []
-    count = 0
-    # for email in emails:
-    #     icss.append(email_to_ics.email_to_ics(email))
-    for ics_file in icss:
-        ics_to_csv.isc_to_csv(ics_file, f"csv{count}")
-        csvs.append(f"csv{count}")
-        count += 1
-    for csv_file in csvs:
-        lstcals.append(csv_to_lstcal.csv_to_lstcal(csv_file, planned_time, flex))
-    return lstcals
 
 def combine_days(day1, day2):
     """
@@ -71,12 +53,9 @@ def busy_to_free(busy_times):
             free_times.append(free_day[:-2])
     return free_times
 
-def find_times(emails, icss, planned_time, flex, availibility = "09:00-17:00", weekends = False):
+def find_times(lstcals, planned_time, flex, availibility = "09:00-17:00", weekends = False):
     """
     """
-
-    # Converting the emails provided into workable List Calendars
-    lstcals = convert(emails, icss, planned_time, flex)
 
     # Combine all of the List Calendars to compile a singular list of all busy times
     busy_times = [[] for _ in range(((flex * 2) + 1))]
@@ -112,8 +91,3 @@ def find_times(emails, icss, planned_time, flex, availibility = "09:00-17:00", w
                 free_times[index] = []
 
     return free_times
-
-x = sys.argv[1]
-planned_time = "2023-08-31 12:00:00+00:00"
-flex = 2
-print(find_times(None, [x], planned_time, flex))
