@@ -16,7 +16,6 @@ def convert(emails, icss, planned_time, flex):
         ics_to_csv.isc_to_csv(ics_file, f"csv{count}")
         csvs.append(f"csv{count}")
         count += 1
-    print(csvs)
     for csv_file in csvs:
         lstcals.append(csv_to_lstcal.csv_to_lstcal(csv_file, planned_time, flex))
     return lstcals
@@ -24,17 +23,17 @@ def convert(emails, icss, planned_time, flex):
 def combine_days(day1, day2):
     """
     """
-    print("Combining:\n")
-    print(day1, day2)
-    print("\n")
+    # print("Combining:\n")
+    # print(day1, day2)
+    # print("\n")
     length = len(day2)
     while length > 2:
         day1 = csv_to_lstcal.add_to_day(day1, day2[1], day2[2])
         day2 = [day2[0]] + day2[3:]
         length -= 2
-    print("Result:\n")
-    print(day1)
-    print("\n")
+    # print("Result:\n")
+    # print(day1)
+    # print("\n")
     return day1
 
 def free_to_busy(avail):
