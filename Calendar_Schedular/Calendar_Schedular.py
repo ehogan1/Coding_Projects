@@ -31,20 +31,24 @@ def meeting_times(icss, planned_time, flex):
     for index, day in enumerate(times):
         if day == []:
             continue
-        print(f"On {(cal_start + timedelta(days=index)).date()}, you have  \
-                availible meeting times(s) from:")
+        print(f"On {(cal_start + timedelta(days=index)).date()}, you have availible meeting times(s) from:")
         for index, hour in enumerate(day):
             # Using a gate to not double print pairs
             if gate:
+                gate = False
                 continue
             hour = str(hour).split('.')
             next_hour = str(day[(index + 1)]).split('.')
             if len(hour[1]) < 2:
-                hour[1] = hour[1] * 10
+                hour[1] = hour[1] + '0'
             if len(next_hour[1]) < 2:
-                next_hour[1] = next_hour[1] * 10
+                next_hour[1] = next_hour[1] + '0'
             print(f"    {hour[0]}:{hour[1]} - {next_hour[0]}:{next_hour[1]}")
+            gate = True
         print('\n')
     return
 
-meeting_times(sys.argv[1], "2023-08-31 12:00:00+00:00", 2)
+icss = []
+for count in range(len(sys.argv) - 1):
+    icss.append(sys.argv[count + 1])
+meeting_times(icss, "2023-08-31 12:00:00+00:00", 2)
