@@ -68,10 +68,23 @@ def update_parameters(w1, b1, w2, b2, dw1, db1, dw2, db2, alpha):
     b2 = b2 - alpha * db2
     return w1, b1, w2, b2
 
+def get_predictions(output_layer):
+    return np.argmax(output_layer, 0)
+
+def get_accuracy(predictions, y):
+    print(predictions, y)
+    return np.sum(predictions == y) / y.size
+
 def gradient_decent(x, y, iterations, alpha):
     w1, b1, w2, b2 = parameter_initialization()
     for i in range(iterations):
         unactivated1, hidden1, unactiavted2, output_layer = forward_prop(w1, b1, w2, b2, x)
         dw1, db1, dw2, db2 = back_prop(unactivated1, hidden1, unactiavted2, output_layer, x, y)
         w1, b1, w2, b2 = update_parameters(w1, b1, w2, b2, dw1, db1, dw2, db2, alpha)
+        if (i % 10 == 0):
+            print('Iteration: ', i)
+            print('Accuracy: ', get_accuracy(get_predictions(output_layer), y)) 
     return w1, b1, w2, b2
+
+test_data, training_data, rows, pixels, y_train, x_train = date_initialization()
+w1, b1, w2, b2 = gradient_decent(x_train, y_train, 100, 0.1)
