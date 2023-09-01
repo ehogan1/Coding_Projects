@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot as plt
 
 def data_initialization():
     test_data = pd.read_csv(r'C:\Users\Edmund Hogan\Coding_Projects\Python_Neural_Network\mnist_test.csv')
