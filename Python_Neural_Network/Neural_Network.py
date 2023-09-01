@@ -28,6 +28,12 @@ def activation_function(z):
     """
     return 1/(1 + np.exp(-x))
 
+def deriv_activ_func(z):
+    """
+    Sigmoid Derivative Function
+    """
+    return activation_function(y) * (1 - activation_function(y))
+
 def softmax(z):
     return exp(Z) / np.sum(exp(2))
 
@@ -35,7 +41,37 @@ def forward_prop(w1, b1, w2, b2, input_layer):
     unactivated1 = w1.dot(input_layer) + b1
     hidden1 = activation_function(unactivated1)
     unactivated2 = w2.dot(hidden1) + b2
-    hidden2 = activation_function(unactivated2)
-    unactivated3 = w3.dot(hidden2) + b3
-    output_layer = softmax(unactivated3)
-    return unactivated1, hidden1, unactivated2, hidden2, unactivated3, hidden3
+    output_layer = softmax(unactivated2)
+    return unactivated1, hidden1, unactivated2, output_layer
+
+def one_hot(y):
+    one_hot_y = np.zeros((y.size, y.max() + 1))
+    one_hot_y[np.arange(y.size), y] = 1
+    one_hot_y = one_hot_y.T
+    return one_hot_y
+
+def back_prop(unactivated1, hidden1, unactivated2, output_layer, w2, x, y):
+    one_hot_y = one_hot(y)
+    m = y.size
+    dz2 = output_layer - one_hot(y)
+    dw2 = 1 / m * dz2.dot(hidden1.T)
+    db2 = 1 / m * np.sum(dz2, 2)
+    dz1 = w2.T.dot(dz2) * deriv_activ_func(unactivated1)
+    dw1 = 1 / m * dz1.dot(x.T)
+    db1 = 1 / m * np.sum(dZ1, 2)
+    return dw1, db1, dw2, db2
+
+def update_parameters(w1, b1, w2, b2, dw1, db1, dw2, db2, alpha):
+    w1 = w1 - alpha * dw1
+    b1 = b1 - alpha * db1
+    w2 = w2 - alpha * dw2
+    b2 = b2 - alpha * db2
+    return w1, b1, w2, b2
+
+def gradient_decent(x, y, iterations, alpha):
+    w1, b1, w2, b2 = parameter_initialization()
+    for i in range(iterations):
+        unactivated1, hidden1, unactiavted2, output_layer = forward_prop(w1, b1, w2, b2, x)
+        dw1, db1, dw2, db2 = back_prop(unactivated1, hidden1, unactiavted2, output_layer, x, y)
+        w1, b1, w2, b2 = update_parameters(w1, b1, w2, b2, dw1, db1, dw2, db2, alpha)
+    return w1, b1, w2, b2
