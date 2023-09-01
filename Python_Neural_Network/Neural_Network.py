@@ -86,5 +86,5 @@ def gradient_decent(x, y, iterations, alpha):
             print('Accuracy: ', get_accuracy(get_predictions(output_layer), y)) 
     return w1, b1, w2, b2
 
-test_data, training_data, rows, pixels, y_train, x_train = date_initialization()
+test_data, training_data, rows, pixels, y_train, x_train = data_initialization()
 w1, b1, w2, b2 = gradient_decent(x_train, y_train, 100, 0.1)
